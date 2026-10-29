@@ -1,0 +1,872 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>1xGames App</title>
+  <style>
+    :root {
+      --primary-blue: #0b436c;
+      --nav-blue: #082d49;
+      --accent-cyan: #00a8e8;
+      --accent-green: #2ecc71;
+      --accent-yellow: #f1c40f;
+      --bg-gray: #f4f6f9;
+      --card-white: #ffffff;
+      --text-dark: #2c3e50;
+      --text-muted: #7f8c8d;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Segoe UI', Tahoma, Arial, sans-serif;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      background-color: #0d1e2b;
+      display: flex;
+      justify-content: center;
+      min-height: 100vh;
+    }
+
+    #app-container {
+      width: 100%;
+      max-width: 440px;
+      background: var(--bg-gray);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      box-shadow: 0 0 30px rgba(0,0,0,0.5);
+    }
+
+    /* شريط الرأس العلوي الأصلي */
+    header.main-header {
+      background: var(--nav-blue);
+      padding: 10px 14px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      color: #fff;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    .logo-area {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-weight: 900;
+      font-size: 1.3rem;
+      color: #fff;
+      letter-spacing: 0.5px;
+    }
+    .logo-area span { color: var(--accent-cyan); }
+    .header-controls {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .balance-box {
+      background: rgba(255,255,255,0.12);
+      padding: 5px 12px;
+      border-radius: 20px;
+      font-size: 0.85rem;
+      font-weight: bold;
+      color: var(--accent-yellow);
+    }
+    .btn-deposit {
+      background: var(--accent-green);
+      color: #fff;
+      border: none;
+      padding: 6px 14px;
+      border-radius: 6px;
+      font-weight: bold;
+      font-size: 0.85rem;
+      cursor: pointer;
+    }
+
+    /* الشريط الفرعي للتصنيفات */
+    .categories-bar {
+      background: #0f3756;
+      display: flex;
+      overflow-x: auto;
+      padding: 8px 10px;
+      gap: 14px;
+      white-space: nowrap;
+      scrollbar-width: none;
+    }
+    .cat-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      color: #cfd8dc;
+      font-size: 0.75rem;
+      gap: 4px;
+      cursor: pointer;
+    }
+    .cat-item.active {
+      color: #fff;
+      font-weight: bold;
+    }
+
+    /* الصفحات */
+    .page-view {
+      display: none;
+      flex: 1;
+      flex-direction: column;
+      padding-bottom: 60px;
+    }
+    .page-view.active {
+      display: flex;
+    }
+
+    /* لافتة ترويجية */
+    .hero-banner {
+      background: linear-gradient(135deg, #0b436c, #16a085);
+      margin: 12px;
+      border-radius: 10px;
+      padding: 16px;
+      color: #fff;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    /* شبكة ألعاب 1xGames */
+    .section-header {
+      padding: 10px 14px 4px;
+      font-weight: bold;
+      color: var(--text-dark);
+      font-size: 1rem;
+      display: flex;
+      justify-content: space-between;
+    }
+    .games-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      padding: 10px 14px;
+    }
+    .game-card {
+      background: #fff;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.06);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      padding: 12px 6px;
+      cursor: pointer;
+      border: 1px solid #e1e8ed;
+      transition: transform 0.1s;
+    }
+    .game-card:active { transform: scale(0.96); }
+    .game-card .thumb {
+      width: 52px;
+      height: 52px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.8rem;
+      margin-bottom: 8px;
+    }
+    .game-card .title {
+      font-size: 0.8rem;
+      font-weight: bold;
+      color: var(--text-dark);
+    }
+
+    /* شريط التنقل السفلي */
+    nav.footer-nav {
+      position: fixed;
+      bottom: 0;
+      width: 100%;
+      max-width: 440px;
+      background: #fff;
+      display: flex;
+      justify-content: space-around;
+      padding: 8px 0;
+      border-top: 1px solid #e0e0e0;
+      z-index: 100;
+    }
+    .nav-btn {
+      background: none;
+      border: none;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 2px;
+      color: var(--text-muted);
+      font-size: 0.75rem;
+      cursor: pointer;
+    }
+    .nav-btn.active { color: var(--primary-blue); font-weight: bold; }
+
+    /* ================= شاشة تفاحة الحظ ================= */
+    .game-play-header {
+      background: #0f2027;
+      color: #fff;
+      padding: 12px 14px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .game-play-header button {
+      background: none;
+      border: none;
+      color: #fff;
+      font-size: 1.2rem;
+      cursor: pointer;
+    }
+
+    #apple-view {
+      background: radial-gradient(circle, #19382b, #0b1c14);
+      color: #fff;
+    }
+    .apple-grid {
+      display: flex;
+      flex-direction: column-reverse;
+      gap: 6px;
+      padding: 12px 14px;
+      flex: 1;
+      justify-content: center;
+    }
+    .apple-row {
+      display: flex;
+      gap: 6px;
+      align-items: center;
+      opacity: 0.45;
+      pointer-events: none;
+    }
+    .apple-row.active {
+      opacity: 1;
+      pointer-events: all;
+    }
+    .apple-row.cleared {
+      opacity: 0.85;
+      pointer-events: none;
+    }
+    .apple-mult-badge {
+      width: 60px;
+      background: #254a37;
+      color: #72f099;
+      text-align: center;
+      font-size: 0.8rem;
+      padding: 8px 0;
+      border-radius: 6px;
+      font-weight: bold;
+    }
+    .apple-cells-container {
+      display: flex;
+      gap: 6px;
+      flex: 1;
+    }
+    .apple-cell {
+      flex: 1;
+      aspect-ratio: 1;
+      background: #875027;
+      border: 2px solid #5a3418;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.4rem;
+      cursor: pointer;
+      user-select: none;
+    }
+    .apple-cell.good { background: #1b7a42; border-color: #2ecc71; }
+    .apple-cell.bad { background: #a92323; border-color: #e74c3c; }
+
+    /* لوحة التحكم داخل الألعاب */
+    .bet-bar {
+      background: #142430;
+      padding: 12px 14px;
+      border-top: 1px solid rgba(255,255,255,0.08);
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .bet-bar-row {
+      display: flex;
+      gap: 8px;
+    }
+    .bet-bar-row input {
+      flex: 1;
+      background: #0b141a;
+      border: 1px solid #2c3e50;
+      color: #fff;
+      padding: 10px;
+      border-radius: 6px;
+      text-align: center;
+      font-size: 1rem;
+      font-weight: bold;
+    }
+    .action-btn {
+      width: 100%;
+      padding: 12px;
+      border-radius: 6px;
+      border: none;
+      font-size: 1rem;
+      font-weight: bold;
+      color: #fff;
+      cursor: pointer;
+    }
+    .action-btn.start { background: var(--accent-green); }
+    .action-btn.cashout { background: var(--accent-yellow); color: #000; }
+
+    /* ================= شاشة لعبة الطيارة ================= */
+    #crash-view { background: #0f1c24; color: #fff; }
+    .crash-arena {
+      flex: 1;
+      margin: 14px;
+      background: #162633;
+      border-radius: 12px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      position: relative;
+      overflow: hidden;
+      border: 1px solid #23394a;
+    }
+    .crash-rate {
+      font-size: 3.8rem;
+      font-weight: 900;
+      color: #00a8e8;
+    }
+    .crash-plane {
+      font-size: 3rem;
+      transition: transform 0.1s linear;
+      margin-bottom: 15px;
+    }
+
+    /* ================= شاشة عجلة الحظ ================= */
+    #wheel-view { background: #13222d; color: #fff; }
+    .wheel-arena {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+    .wheel-disc {
+      width: 250px;
+      height: 250px;
+      border-radius: 50%;
+      border: 6px solid var(--accent-yellow);
+      background: conic-gradient(
+        #e74c3c 0deg 60deg,
+        #3498db 60deg 120deg,
+        #2ecc71 120deg 180deg,
+        #f39c12 180deg 240deg,
+        #9b59b6 240deg 300deg,
+        #1abc9c 300deg 360deg
+      );
+      transition: transform 4s cubic-bezier(0.1, 0.7, 0.1, 1);
+    }
+    .wheel-indicator {
+      width: 0;
+      height: 0;
+      border-left: 14px solid transparent;
+      border-right: 14px solid transparent;
+      border-top: 24px solid #fff;
+      z-index: 10;
+      margin-bottom: -10px;
+    }
+
+    /* ================= شاشة الإيداع الأصلية ================= */
+    #deposit-view { background: #fff; }
+    .deposit-container {
+      padding: 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .method-card {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border: 1px solid #e0e6ed;
+      border-radius: 8px;
+      padding: 12px;
+      cursor: pointer;
+      background: #fafbfc;
+    }
+    .method-info {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-weight: bold;
+      color: var(--text-dark);
+    }
+  </style>
+</head>
+<body>
+
+<div id="app-container">
+
+  <!-- الرأس الثابت -->
+  <header class="main-header">
+    <div class="logo-area">1x<span>GAMES</span></div>
+    <div class="header-controls">
+      <div class="balance-box"><span id="wallet-balance">1000.00</span> ج.م</div>
+      <button class="btn-deposit" onclick="navigate('deposit-view')">اشحن +</button>
+    </div>
+  </header>
+
+  <!-- شريط التصنيفات العلوي -->
+  <div class="categories-bar">
+    <div class="cat-item active" onclick="navigate('home-view')"><span>🎮</span> 1xGames</div>
+    <div class="cat-item" onclick="navigate('deposit-view')"><span>💳</span> الإيداع</div>
+    <div class="cat-item" onclick="openGame('apple')"><span>🍎</span> تفاحة الحظ</div>
+    <div class="cat-item" onclick="openGame('crash')"><span>🚀</span> الطيارة</div>
+    <div class="cat-item" onclick="openGame('wheel')"><span>🎡</span> العجلة</div>
+  </div>
+
+  <!-- 1. الشاشة الرئيسية -->
+  <div id="home-view" class="page-view active">
+    <div class="hero-banner">
+      <div>
+        <h2>بونص 100%</h2>
+        <p style="font-size:0.8rem;">على أول إيداع لك عبر فودافون كاش</p>
+      </div>
+      <div style="font-size: 2.2rem;">🎁</div>
+    </div>
+
+    <div class="section-header">
+      <span>الألعاب الشائعة</span>
+      <span style="font-size:0.8rem; color: var(--accent-cyan);">عرض الكل</span>
+    </div>
+
+    <div class="games-grid">
+      <div class="game-card" onclick="openGame('apple')">
+        <div class="thumb" style="background:#eafaf1;">🍎</div>
+        <div class="title">Apple Of Fortune</div>
+      </div>
+      <div class="game-card" onclick="openGame('crash')">
+        <div class="thumb" style="background:#ebf5fb;">🚀</div>
+        <div class="title">Crash (الطيارة)</div>
+      </div>
+      <div class="game-card" onclick="openGame('wheel')">
+        <div class="thumb" style="background:#fef9e7;">🎡</div>
+        <div class="title">Lucky Wheel</div>
+      </div>
+      <div class="game-card" onclick="alert('لعبة الكريستال (قريباً)')">
+        <div class="thumb" style="background:#f4ecf7;">💎</div>
+        <div class="title">Crystal</div>
+      </div>
+      <div class="game-card" onclick="alert('لعبة 21 (قريباً)')">
+        <div class="thumb" style="background:#fdedec;">🃏</div>
+        <div class="title">21</div>
+      </div>
+      <div class="game-card" onclick="alert('لعبة النرد (قريباً)')">
+        <div class="thumb" style="background:#eaeded;">🎲</div>
+        <div class="title">Under 7 Over</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 2. صفحة تفاحة الحظ (Apple of Fortune) -->
+  <div id="apple-view" class="page-view">
+    <div class="game-play-header">
+      <button onclick="navigate('home-view')">✕</button>
+      <span>Apple of Fortune 🍎</span>
+      <div></div>
+    </div>
+    <div class="apple-grid" id="appleGrid"></div>
+    <div class="bet-bar">
+      <div id="appleStatus" style="text-align:center; font-size:0.85rem; color:#a2d9ce;">حدد قيمة الرهان واضغط ابدأ</div>
+      <div class="bet-bar-row">
+        <input type="number" id="appleBetInput" value="20" min="5" step="5">
+      </div>
+      <button class="action-btn start" id="appleActionBtn" onclick="handleAppleLogic()">ابدأ الرهان</button>
+    </div>
+  </div>
+
+  <!-- 3. صفحة الطيارة (Crash) -->
+  <div id="crash-view" class="page-view">
+    <div class="game-play-header">
+      <button onclick="navigate('home-view')">✕</button>
+      <span>Crash 🚀</span>
+      <div></div>
+    </div>
+    <div class="crash-arena">
+      <div class="crash-plane" id="crashPlane">🚀</div>
+      <div class="crash-rate" id="crashRateText">1.00x</div>
+      <div id="crashSub" style="color:#7f8c8d; font-size:0.9rem;">جاهز للرحلة القادمة</div>
+    </div>
+    <div class="bet-bar">
+      <div class="bet-bar-row">
+        <input type="number" id="crashBetInput" value="20" min="5" step="5">
+      </div>
+      <button class="action-btn start" id="crashActionBtn" onclick="handleCrashLogic()">إقلاع</button>
+    </div>
+  </div>
+
+  <!-- 4. صفحة عجلة الحظ (Lucky Wheel) -->
+  <div id="wheel-view" class="page-view">
+    <div class="game-play-header">
+      <button onclick="navigate('home-view')">✕</button>
+      <span>Lucky Wheel 🎡</span>
+      <div></div>
+    </div>
+    <div class="wheel-arena">
+      <div class="wheel-indicator"></div>
+      <div class="wheel-disc" id="wheelDisc"></div>
+      <div id="wheelRes" style="margin-top: 15px; font-weight: bold; font-size:1.1rem;">تكلفة الدورة: 10 ج.م</div>
+    </div>
+    <div class="bet-bar">
+      <button class="action-btn" style="background:var(--accent-yellow); color:#000;" id="wheelBtn" onclick="spinWheelLogic()">تدوير مجاناً / بـ 10 ج.م</button>
+    </div>
+  </div>
+
+  <!-- 5. صفحة الإيداع (Vodafone Cash / InstaPay) -->
+  <div id="deposit-view" class="page-view">
+    <div class="game-play-header" style="background:var(--nav-blue);">
+      <button onclick="navigate('home-view')">✕</button>
+      <span>إيداعات الحساب</span>
+      <div></div>
+    </div>
+    <div class="deposit-container">
+      <div style="font-size:0.85rem; color:#7f8c8d;">طرق الدفع الموصى بها في مصر:</div>
+      
+      <div class="method-card" onclick="makeDeposit('Vodafone Cash', 100)">
+        <div class="method-info">
+          <span style="font-size:1.5rem;">🔴</span>
+          <div>فودافون كاش (Vodafone Cash)</div>
+        </div>
+        <span style="color:var(--accent-green); font-weight:bold;">+100 ج.م</span>
+      </div>
+
+      <div class="method-card" onclick="makeDeposit('InstaPay', 200)">
+        <div class="method-info">
+          <span style="font-size:1.5rem;">🟣</span>
+          <div>إنستاباي (InstaPay)</div>
+        </div>
+        <span style="color:var(--accent-green); font-weight:bold;">+200 ج.م</span>
+      </div>
+
+      <div class="method-card" onclick="makeDeposit('Orange Cash', 50)">
+        <div class="method-info">
+          <span style="font-size:1.5rem;">🟠</span>
+          <div>أورنج كاش (Orange Cash)</div>
+        </div>
+        <span style="color:var(--accent-green); font-weight:bold;">+50 ج.م</span>
+      </div>
+
+      <div class="method-card" onclick="makeDeposit('Etisalat Cash', 100)">
+        <div class="method-info">
+          <span style="font-size:1.5rem;">🟢</span>
+          <div>اتصالات كاش (Etisalat)</div>
+        </div>
+        <span style="color:var(--accent-green); font-weight:bold;">+100 ج.م</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- شريط التنقل الثابت بالأسفل -->
+  <nav class="footer-nav">
+    <button class="nav-btn active" onclick="navigate('home-view')">
+      <span>🏠</span>
+      <span>الرئيسية</span>
+    </button>
+    <button class="nav-btn" onclick="openGame('apple')">
+      <span>🍎</span>
+      <span>التفاحة</span>
+    </button>
+    <button class="nav-btn" onclick="navigate('deposit-view')">
+      <span>💳</span>
+      <span>شحن</span>
+    </button>
+    <button class="nav-btn" onclick="alert('حساب المستخدم: 1818117969\nالحالة: موثق')">
+      <span>👤</span>
+      <span>حسابي</span>
+    </button>
+  </nav>
+
+</div>
+
+<script>
+  /* ================= الحالة المشتركة ================= */
+  let balance = 1000.00;
+
+  function updateWalletUI() {
+    document.getElementById('wallet-balance').innerText = balance.toFixed(2);
+  }
+
+  function navigate(viewId) {
+    document.querySelectorAll('.page-view').forEach(p => p.classList.remove('active'));
+    document.getElementById(viewId).classList.add('active');
+  }
+
+  function openGame(g) {
+    if (g === 'apple') {
+      navigate('apple-view');
+      setupAppleBoard();
+    } else if (g === 'crash') {
+      navigate('crash-view');
+      resetCrashUI();
+    } else if (g === 'wheel') {
+      navigate('wheel-view');
+    }
+  }
+
+  function makeDeposit(provider, amount) {
+    balance += amount;
+    updateWalletUI();
+    alert(`تم استلام الإيداع بنجاح عبر ${provider} بقيمة ${amount} ج.م`);
+    navigate('home-view');
+  }
+
+  /* ================= منطق تفاحة الحظ ================= */
+  const APPLE_TIERS = [
+    { mult: 1.23, bad: 1 },
+    { mult: 1.54, bad: 1 },
+    { mult: 1.93, bad: 1 },
+    { mult: 2.41, bad: 1 },
+    { mult: 4.02, bad: 2 },
+    { mult: 6.71, bad: 2 },
+    { mult: 11.18, bad: 2 },
+    { mult: 27.97, bad: 3 },
+    { mult: 69.93, bad: 3 },
+    { mult: 349.68, bad: 4 }
+  ];
+
+  let appleActive = false;
+  let appleLevel = 0;
+  let appleStake = 0;
+  let appleGridData = [];
+
+  function setupAppleBoard() {
+    const grid = document.getElementById('appleGrid');
+    grid.innerHTML = '';
+    APPLE_TIERS.forEach((tier, rowIdx) => {
+      const row = document.createElement('div');
+      row.className = 'apple-row';
+      row.id = `ap-r-${rowIdx}`;
+
+      const multBadge = document.createElement('div');
+      multBadge.className = 'apple-mult-badge';
+      multBadge.innerText = `x${tier.mult}`;
+
+      const cellsBox = document.createElement('div');
+      cellsBox.className = 'apple-cells-container';
+
+      for (let c = 0; c < 5; c++) {
+        const cell = document.createElement('div');
+        cell.className = 'apple-cell';
+        cell.onclick = () => onApplePick(rowIdx, c);
+        cellsBox.appendChild(cell);
+      }
+
+      row.appendChild(multBadge);
+      row.appendChild(cellsBox);
+      grid.appendChild(row);
+    });
+  }
+
+  function handleAppleLogic() {
+    const btn = document.getElementById('appleActionBtn');
+    if (!appleActive) {
+      const bet = parseFloat(document.getElementById('appleBetInput').value);
+      if (isNaN(bet) || bet <= 0 || bet > balance) {
+        alert('رصيدك غير كافٍ!');
+        return;
+      }
+      balance -= bet;
+      appleStake = bet;
+      updateWalletUI();
+
+      appleActive = true;
+      appleLevel = 0;
+      setupAppleBoard();
+
+      // توزيع التفاح الفاسد عشوائياً
+      appleGridData = APPLE_TIERS.map(t => {
+        let row = [true, true, true, true, true];
+        let placed = 0;
+        while (placed < t.bad) {
+          let pos = Math.floor(Math.random() * 5);
+          if (row[pos] !== false) {
+            row[pos] = false;
+            placed++;
+          }
+        }
+        return row;
+      });
+
+      document.getElementById('ap-r-0').classList.add('active');
+      document.getElementById('appleBetInput').disabled = true;
+      btn.innerText = "سحب الأرباح (0)";
+      btn.className = "action-btn cashout";
+      btn.disabled = true;
+      document.getElementById('appleStatus').innerText = "اختر خانة من الصف الأول";
+    } else {
+      // سحب الأرباح
+      const win = appleStake * APPLE_TIERS[appleLevel - 1].mult;
+      balance += win;
+      updateWalletUI();
+      document.getElementById('appleStatus').innerText = `مبروك! تم سحب ${win.toFixed(2)} ج.م`;
+      resetAppleControls();
+    }
+  }
+
+  function onApplePick(rIdx, cIdx) {
+    if (!appleActive || rIdx !== appleLevel) return;
+
+    const row = document.getElementById(`ap-r-${rIdx}`);
+    const cell = row.querySelectorAll('.apple-cell')[cIdx];
+    const isGood = appleGridData[rIdx][cIdx];
+
+    if (isGood) {
+      cell.innerText = "🍏";
+      cell.classList.add('good');
+      row.classList.remove('active');
+      row.classList.add('cleared');
+
+      const profit = (appleStake * APPLE_TIERS[appleLevel].mult).toFixed(2);
+      const btn = document.getElementById('appleActionBtn');
+      btn.disabled = false;
+      btn.innerText = `سحب الأرباح (${profit} ج.م)`;
+
+      appleLevel++;
+      if (appleLevel >= APPLE_TIERS.length) {
+        handleAppleLogic(); // كاش أوت تلقائي عند إتمام آخر مستوى
+      } else {
+        document.getElementById(`ap-r-${appleLevel}`).classList.add('active');
+        document.getElementById('appleStatus').innerText = `ممتاز! واصل الصعود للمستوى ${appleLevel + 1}`;
+      }
+    } else {
+      cell.innerText = "🍎";
+      cell.classList.add('bad');
+      // إظهار باقي الصف
+      appleGridData[rIdx].forEach((val, i) => {
+        const c = row.querySelectorAll('.apple-cell')[i];
+        c.innerText = val ? "🍏" : "🍎";
+        c.classList.add(val ? 'good' : 'bad');
+      });
+      document.getElementById('appleStatus').innerText = "تفاحة فاسدة! حظ أوفر المرة القادمة.";
+      resetAppleControls();
+    }
+  }
+
+  function resetAppleControls() {
+    appleActive = false;
+    document.getElementById('appleBetInput').disabled = false;
+    const btn = document.getElementById('appleActionBtn');
+    btn.innerText = "ابدأ الرهان";
+    btn.className = "action-btn start";
+    btn.disabled = false;
+    document.querySelectorAll('.apple-row').forEach(r => r.classList.remove('active'));
+  }
+
+  /* ================= منطق لعبة الطيارة ================= */
+  let crashRunning = false;
+  let crashRate = 1.00;
+  let crashLimit = 1.00;
+  let crashTimer = null;
+  let crashBetVal = 0;
+
+  function resetCrashUI() {
+    document.getElementById('crashRateText').innerText = "1.00x";
+    document.getElementById('crashRateText').style.color = "#00a8e8";
+    document.getElementById('crashPlane').style.transform = "translate(0,0)";
+  }
+
+  function handleCrashLogic() {
+    const btn = document.getElementById('crashActionBtn');
+    if (!crashRunning) {
+      const bet = parseFloat(document.getElementById('crashBetInput').value);
+      if (isNaN(bet) || bet <= 0 || bet > balance) {
+        alert('رصيدك غير كافٍ!');
+        return;
+      }
+      balance -= bet;
+      crashBetVal = bet;
+      updateWalletUI();
+
+      crashRunning = true;
+      crashRate = 1.00;
+      crashLimit = parseFloat((1.1 + Math.random() * 4.5).toFixed(2));
+
+      document.getElementById('crashBetInput').disabled = true;
+      btn.innerText = "سحب الأرباح (1.00x)";
+      btn.className = "action-btn cashout";
+      document.getElementById('crashSub').innerText = "الطيارة في الجو...";
+      document.getElementById('crashRateText').style.color = "#00a8e8";
+
+      crashTimer = setInterval(() => {
+        crashRate += 0.04;
+        document.getElementById('crashRateText').innerText = crashRate.toFixed(2) + "x";
+        btn.innerText = `سحب (${(crashBetVal * crashRate).toFixed(2)} ج.م)`;
+
+        let pos = Math.min((crashRate - 1) * 35, 75);
+        document.getElementById('crashPlane').style.transform = `translate(${pos}px, -${pos}px)`;
+
+        if (crashRate >= crashLimit) {
+          clearInterval(crashTimer);
+          crashRunning = false;
+          document.getElementById('crashRateText').style.color = "#e74c3c";
+          document.getElementById('crashSub').innerText = "انفجرت الطيارة! تم تصفير الرهان.";
+          btn.innerText = "إقلاع";
+          btn.className = "action-btn start";
+          document.getElementById('crashBetInput').disabled = false;
+        }
+      }, 100);
+    } else {
+      clearInterval(crashTimer);
+      crashRunning = false;
+      const profit = crashBetVal * crashRate;
+      balance += profit;
+      updateWalletUI();
+      document.getElementById('crashSub').innerText = `تم السحب بنجاح بمضاعف ${crashRate.toFixed(2)}x (+${profit.toFixed(2)} ج.م)`;
+      btn.innerText = "إقلاع";
+      btn.className = "action-btn start";
+      document.getElementById('crashBetInput').disabled = false;
+    }
+  }
+
+  /* ================= منطق عجلة الحظ ================= */
+  let wheelDeg = 0;
+  let wheelBusy = false;
+
+  function spinWheelLogic() {
+    if (wheelBusy) return;
+    if (balance < 10) {
+      alert('الحد الأدنى لتدوير العجلة 10 ج.م');
+      return;
+    }
+    balance -= 10;
+    updateWalletUI();
+
+    wheelBusy = true;
+    const wheel = document.getElementById('wheelDisc');
+    const res = document.getElementById('wheelRes');
+    res.innerText = "العجلة تدور...";
+
+    const randTurn = Math.floor(1800 + Math.random() * 1800);
+    wheelDeg += randTurn;
+    wheel.style.transform = `rotate(${wheelDeg}deg)`;
+
+    setTimeout(() => {
+      wheelBusy = false;
+      const prizes = [0, 5, 10, 25, 50, 100];
+      const outcome = prizes[Math.floor(Math.random() * prizes.length)];
+      balance += outcome;
+      updateWalletUI();
+      res.innerText = outcome > 0 ? `🎉 مبروك! ربحت ${outcome} ج.م` : "حظ أوفر في المرة القادمة!";
+    }, 4000);
+  }
+
+  // بدء تشغيل الرصيد والواجهة الأولية
+  updateWalletUI();
+  setupAppleBoard();
+</script>
+</body>
+</html>
